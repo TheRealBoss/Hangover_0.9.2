@@ -48,7 +48,7 @@ MOVESPEED = 50
 curser = [390, 190, 50, 50]# Start position for the curser on the menu
 
 # videos
-hangoverClip = pygame.movie.Movie('eyeblink.mpg')
+hangoverClip = pygame.movie.Movie('eyeblink.mpg') random
 danceClip = pygame.movie.Movie('dance.mpg')
 
 # set up the fonts - vajadusel muuta
