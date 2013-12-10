@@ -154,7 +154,7 @@ def displayBoard(display, missedLetters, correctLetters, secretWord): #0- displa
     windowSurface.blit(length,(815,90))
     if score[2]!='':
         result = titleFont.render(score[2], True, BLUE,)
-        windowSurface.blit(result, (730,365))
+        windowSurface.blit(result, (767,365))
     for i in range (len(secretWord)):
         if secretWord[i] in correctLetters:
             blanks = blanks[:i] + secretWord[i] + blanks [i+1:]
@@ -198,15 +198,23 @@ def displayBoard(display, missedLetters, correctLetters, secretWord): #0- displa
                     windowSurface.blit(text4b, (840,240))
                     windowSurface.blit(text4c, (900,236))
                     if display >= 5:
-                        pygame.draw.rect(windowSurface, WHITE,(741,229,218,41))
-                        pygame.draw.rect(windowSurface, BLACK,(740,229,220,41),1)
+                        pygame.draw.rect(windowSurface, WHITE,(741,269,218,41))
+                        pygame.draw.rect(windowSurface, BLACK,(740,269,220,41),1)
                         text4a = guessFont.render('5.', True, BLACK,)
                         text4b = guessFont.render(missedLetters[4].upper(), True, BLUE,)
                         text4c = titleFont.render('X', True, RED,)
-                        windowSurface.blit(text4a, (747,240))
-                        windowSurface.blit(text4b, (840,240))
-                        windowSurface.blit(text4c, (900,236))
-                        
+                        windowSurface.blit(text4a, (747,280))
+                        windowSurface.blit(text4b, (840,280))
+                        windowSurface.blit(text4c, (900,276))
+                        if display >= 6:
+                            pygame.draw.rect(windowSurface, WHITE,(741,309,218,41))
+                            pygame.draw.rect(windowSurface, BLACK,(740,309,220,41),1)
+                            text6a = guessFont.render('6.', True, BLACK,)
+                            text6b = guessFont.render(missedLetters[5].upper(), True, BLUE,)
+                            text6c = titleFont.render('X', True, RED,)
+                            windowSurface.blit(text6a, (747,320))
+                            windowSurface.blit(text6b, (840,320))
+                            windowSurface.blit(text6c, (900,316))
 
 def update():
     background()
