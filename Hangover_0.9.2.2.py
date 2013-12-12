@@ -36,31 +36,38 @@ missedLetters = ""
 correctLetters = ""
 gameIsDone = False
 roundNo = 0
-textFile = open("wordlist.txt", "r")
-wordList = []
-option = [0,'New Game','About','Quit',0,'',0]# menu options
-score = [0,0,'',0,0]# [0-Player Rounds,1-Hangman Rounds,2-Result,3-Player Games, 4-Hangman Games]
+option = [0,'New Game','About','Quit',0,'']# menu options
+score = ""
 s = 0   # Stage counter
 guessed = [0,'Guess a letter in my secret word!',0]# [0-(0 invalid guess, 1 valid guess),1-Screen Prompt,2-Keyboard delay
 infoDisplayText = ['Welcome to Hangover','','by','','The Boss','']# [0-5 Text, 2 per row]
-banner =[50,50,0,0,0,0,0,0]# Start point for Hangman+ banner text, mountains etc
+banner =[50,50,0,0,0,0,0,0]
 MOVESPEED = 50
-curser = [390, 190, 50, 50]# Start position for the curser on the menu
+cursor = [390, 190, 50, 50]# Start position for the cursor on the menu
 
 # videos
 hangoverClip = pygame.movie.Movie('eyeblink.mpg')
-danceClip = pygame.movie.Movie('dance.mpg')
+##danceClip = pygame.movie.Movie('dance.mpg')
+
+# sounds
+
 
 # set up the fonts - vajadusel muuta
 smallFont = pygame.font.SysFont(None, 20)
 basicFont = pygame.font.SysFont(None, 30)
 guessFont = pygame.font.SysFont(None, 36)
 titleFont = pygame.font.SysFont(None, 48)
+titleFonts = pygame.font.SysFont(None, 54)
 bannerFont = pygame.font.SysFont(None, 64)
 
 # dictionary setup
-for t in range(3):
-    wordList.append(textFile.readline().split())
+def dictionary():
+    textFile = open("wordlist.txt", "r")
+    wordList = []
+    for t in range(4):
+        wordList.append(textFile.readline().split())
+    textFile.close()
+    return wordList
 
 # Random Word generator
 def getRandomWord(wordDict, level):
@@ -88,25 +95,28 @@ def background():
         background = pygame.image.load("baari_ees.jpg")
         windowSurface.blit(background, (0, 0))
     elif roundNo == 2:
-        background = pygame.image.load("tantsuporand.jpg")
+        background = pygame.image.load("tantsporandal.jpg")
+        windowSurface.blit(background, (0, 0))
+    elif roundNo == 3:
+        background = pygame.image.load("tantsporandal.jpg") #ajutine
         windowSurface.blit(background, (0, 0))
 
     
-# winscreen/lossscreen - siia alla win/lossscreen videode funktsioonid.
+# winscreen/lossscreen
 def hangover():
     hangoverClip.set_display(windowSurface, (0, 0, 960, 720)) # (left, top, width, height)
     hangoverClip.play()
 
-def dance():
-    danceClip.set_display(windowSurface, (0, 0, 960, 720))
-    danceClip.play()
+##def dance():
+##    danceClip.set_display(windowSurface, (0, 0, 960, 720))
+##    danceClip.play()
     
     
 # Get a guess from player
 def getGuess(alreadyGuessed):
     while event.type == pygame.KEYDOWN:
         global guess
-        guessed[0]=1 #valid guess
+        guessed[0]=1
         guessed[2]=15 #keyboard delay
         guess = event.dict["unicode"]
         guess = guess.lower()
@@ -130,17 +140,17 @@ def getGuess(alreadyGuessed):
         guessed[2] = 0
         return
         
-# Updates the screen with the guesses, correct letters
-def displayBoard(display, missedLetters, correctLetters, secretWord): #0- display
+# correct/incorrect letters
+def displayBoard(display, missedLetters, correctLetters, secretWord):
     blanks = '-' * len(secretWord)
-    blankText = titleFont.render(blanks, True, WHITE,)## võibolla vigane
+    blankText = bannerFont.render(blanks, True, WHITE,)
     windowSurface.blit(blankText, (150,140))
     title = titleFont.render('Hangover', True, WHITE,)
     titles = titleFont.render('Hangover', True, BLACK,)
     pygame.draw.rect(windowSurface, BLACK,(740,20,220,440),1)
     pygame.draw.rect(windowSurface, BLACK,(741,21,218,89))
     length = basicFont.render(str(len(secretWord)) + ' letters', True, YELLOW,)
-    if roundNo<3:
+    if roundNo<4:
         scoreboard = basicFont.render('Round ' + str(roundNo+1), True, YELLOW,)
         scoreboards = basicFont.render('Round ' + str(roundNo+1), True, YELLOW,)
         windowSurface.blit(scoreboards,(815,419))
@@ -152,16 +162,17 @@ def displayBoard(display, missedLetters, correctLetters, secretWord): #0- displa
     windowSurface.blit(titles,(783,23))
     windowSurface.blit(title,(785,25))
     windowSurface.blit(length,(815,90))
-    if score[2]!='':
-        result = titleFont.render(score[2], True, BLUE,)
+    if score!='':
+        result = titleFont.render(score, True, BLUE,)
         windowSurface.blit(result, (767,365))
     for i in range (len(secretWord)):
         if secretWord[i] in correctLetters:
             blanks = blanks[:i] + secretWord[i] + blanks [i+1:]
-            correctText = titleFont.render(blanks, True, WHITE,)
-            pygame.draw.rect(windowSurface, BLACK,(140, 135, len(secretWord) * 25,40))
-            windowSurface.blit(correctText, (150,140))
-    if display >=1: #elif
+    correctText = bannerFont.render(blanks, True, RED,)
+    pygame.draw.rect(windowSurface, WHITE,(140, 135, 200,50))
+    pygame.draw.rect(windowSurface, BLACK, (139, 134, 202, 52),2)
+    windowSurface.blit(correctText, (150,140))
+    if display >=1:
         pygame.draw.rect(windowSurface, WHITE,(741,109,218,41))
         pygame.draw.rect(windowSurface, BLACK,(740,109,220,41),1)
         text1a = guessFont.render('1.', True, BLACK,)
@@ -230,31 +241,28 @@ def start():
 
 # Opening menu
 def menu():
-    # run the menu loop
     moveUp = False
     moveDown = False
-    while option[4]==0:# Option [5] is the selection output bit
-        # check for events
+    while option[4]==0:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN:
-                    # change the keyboard variables
-                    if event.key == K_UP or event.key == ord('w'):#Curser Up
+                    if event.key == K_UP or event.key == ord('w'):
                         moveDown = False
                         moveUp = True
-                    if event.key == K_DOWN or event.key == ord('s'):#Curser Down
+                    if event.key == K_DOWN or event.key == ord('s'):
                         moveUp = False
                         moveDown = True
-                    if event.key == K_RETURN or event.key == K_SPACE:#Select current option
-                        if curser[1]==190:
+                    if event.key == K_RETURN:
+                        if cursor[1]==190:
                             option[4]=1
                             secretWord = getRandomWord(wordList, roundNo)
-                        if curser[1]==240:
-                            option[6]=600
+                        if cursor[1]==240:
+                            option[0]=600
                             about()
-                        if curser[1]==290:
+                        if cursor[1]==290:
                             pygame.quit()
                             sys.exit()
             if event.type == KEYUP:
@@ -266,33 +274,32 @@ def menu():
                     if event.key == K_DOWN or event.key == ord('s'):
                         moveDown = False
 
-        # move the Curser
-        if moveDown and curser[1] < 290:
-            curser[1] += MOVESPEED
+        # moving the cursor
+        if moveDown and cursor[1] < 290:
+            cursor[1] += MOVESPEED
             moveDown = False
-        if moveUp and curser[1] > 200:
-            curser[1] -= MOVESPEED
+        if moveUp and cursor[1] > 200:
+            cursor[1] -= MOVESPEED
             moveUp = False
 
-        # draw the background onto the surface & draw the banner
         background()
         drawBanner()
 
-        # Output the current curser position
-        if curser[1]==190:
-            curser[2]=150
+        # cursor position
+        if cursor[1]==190:
+            cursor[2]=150
             option[5]='Play this awesome game'
-        if curser[1]==240:
-            curser[2]=150
+        if cursor[1]==240:
+            cursor[2]=150
             option[5]='About Hangover'
-        if curser[1]==290:
-            curser[2]=150
+        if cursor[1]==290:
+            cursor[2]=150
             option[5]='Quit Game'
 
-        # draw the curser onto the surface
-        pygame.draw.rect(windowSurface, WHITE, (curser[0],curser[1],curser[2],curser[3]),1)
+        # cursor
+        pygame.draw.rect(windowSurface, WHITE, (cursor[0],cursor[1],cursor[2],cursor[3]),1)
 
-        # draw the options onto the surface
+        # options
         text1s = guessFont.render(option[1], True, BLACK,)
         text1 = guessFont.render(option[1], True, WHITE,)
         text2s = guessFont.render(option[2], True, BLACK,)
@@ -314,7 +321,6 @@ def menu():
         windowSurface.blit(text6s, (banner[0]-2,banner[1]-2))
         windowSurface.blit(text6, (banner[0],banner[1]))
         backgroundAnim()
-        # draw the window onto the screen
         pygame.display.update()
 
 def drawBanner():
@@ -322,8 +328,8 @@ def drawBanner():
     pygame.draw.line(windowSurface,BLACK,(0,47),(WINDOWWIDTH,47),1)
     pygame.draw.line(windowSurface,BLACK,(0,93),(WINDOWWIDTH,93),1)
 
-def backgroundAnim(): # muuda
-        if banner[0]<=960:# Animate the banner text
+def backgroundAnim():
+        if banner[0]<=960:
             banner[0]+=1
         if banner[0]>960:
             banner[0]=-240
@@ -351,14 +357,14 @@ def backgroundAnim(): # muuda
             banner[6]+=1
 
 def about():
-    while option[6]>=0:
+    while option[0]>=0:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN:
                 if event.key == K_RETURN:#Return to main menu
-                    option[6]=0
+                    option[0]=0
         background()
         drawBanner()
         text1s = guessFont.render('This is a game, based on the movie "The Hangover"', True, BLACK,)
@@ -386,8 +392,8 @@ def about():
         windowSurface.blit(text6s, (banner[0]-2,banner[1]-2))
         windowSurface.blit(text6, (banner[0],banner[1]))
         backgroundAnim()
-        option[6]-=1
-        timer=int(option[6]/40)
+        option[0]-=1
+        timer=int(option[0]/40)
         text7s = guessFont.render(str(timer), True, BLACK,)
         text7 = guessFont.render(str(timer), True, WHITE,)
         windowSurface.blit(text7s, (769,9))
@@ -397,14 +403,13 @@ def about():
 
 
 # game loop
+wordList = dictionary()
 secretWord = getRandomWord(wordList, roundNo)
 menu()
 start()
-##infoDisplayText = ['Think you can beat me??','','Hahahahahaha!!!','','You have no chance!','']
 infoDisplay()
 infoDisplayText = ['Well done!','','You have reached round ',str(roundNo+1)]
 while True:
-    # check for the QUIT event
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -413,38 +418,33 @@ while True:
     if guessed[2]>0:# Guess input keyboard delay
         guessed[2]-=1
     else:
-        if guessed[0] == 0: # if invalid guess, add it to missed letters #
+        if guessed[0] == 0:
             getGuess(missedLetters + correctLetters)
         else:
             guessed[0] = 0
             if str(guess) in secretWord:
-                correctLetters = correctLetters + guess # add a valid guess to correct letters
+                correctLetters = correctLetters + guess
                 foundAllLetters = True
                 for i in range(len(secretWord)):
-                    if secretWord[i] not in correctLetters: # if a letter is missing from the whole word, all letters are not found
+                    if secretWord[i] not in correctLetters:
                         foundAllLetters = False
                         break
-                if foundAllLetters: # if the word is fully guessed...
-                    roundNo+=1 # next round
+                if foundAllLetters:
+                    roundNo+=1
                     update()
                     sleep(1)
-                    if roundNo == 3: # if last word is guessed
+                    if roundNo == 4:
                         infoDisplayText = ['Congratulation!','','You had a nice party','','and arrived home happily!','']
                         infoDisplay()
                         sleep(3)
                         gameIsDone = True
                     else:
-                        score[2]=''
+                        score=''
                         guess = ''
                         missedLetters = ''
                         correctLetters = ''
-                        secretWord = getRandomWord(wordList, roundNo)
-                        if roundNo == 1:    
-                            infoDisplayText = ['Well done!','','You have reached round ',str(roundNo+1), ' ', ' ']
-                        elif roundNo == 2:
-                            infoDisplayText = ['Well done!','','You have reached round ',str(roundNo+1), ' ', ' ']
-                        elif roundNo == 3:
-                            infoDisplayText = ['Well done!','','You have reached round ',str(roundNo+1), ' ', ' ']                          
+                        secretWord = getRandomWord(wordList, roundNo) 
+                        infoDisplayText = ['Well done!','','You have reached round ',str(roundNo+1), ' ', ' ']  
                         gameIsDone = False
                         guessed=[0,'Guess a letter in my secret word!',0]
                         s = 0
@@ -453,15 +453,17 @@ while True:
                 missedLetters = missedLetters + str(guess)
                 s+= 1
                 if len(missedLetters) == 6:
-                            score[2]='You Lost!'
+                            score='You Lost!'
                             displayBoard(s, missedLetters, correctLetters, secretWord)
                             infoDisplayText = ['Hahaha ','You Lost!','You had reached round ',str(roundNo+1),'The word was ',secretWord.title()]
                             infoDisplay()
                             sleep(2)
                             gameIsDone = True
             if gameIsDone:
+                if roundNo == 4:
+                    sleep(1)
                 if roundNo == 3:
-                    sleep(1) ## Sleep ette pane funktsioon, näiteks allpool on hangover(). See on winscreen video vms. Sleep väärtus vastavalt video pikkusele.
+                    sleep(1)
                 if roundNo == 2:
                     sleep(1)
                 if roundNo == 1:
@@ -470,7 +472,7 @@ while True:
                     hangover()
                     sleep(8)
                 roundNo=0
-                score[2]=''
+                score=''
                 guess = ''
                 missedLetters = ''
                 correctLetters = ''
